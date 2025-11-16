@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { Href, useGlobalSearchParams, useRouter } from "expo-router";
-import { StyleSheet, View, useColorScheme, ScrollView, Pressable } from 'react-native';
+import { StyleSheet, View, useColorScheme, ScrollView, Pressable, KeyboardAvoidingView } from 'react-native';
 import { StatusBar } from "expo-status-bar";
 // Components
 import { ThemedText } from "@/components/ThemedText";
@@ -15,6 +15,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Colors } from "@/constants/Colors";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const isValidUUID = (id: string | null) => {
   if (!id) return false;
@@ -67,9 +68,12 @@ export default function NewListScreen() {
   };
 
   //color scheme and styles
+  
+  const insets = useSafeAreaInsets();
   const scheme = useColorScheme();
   const colors = Colors[scheme ?? 'light'];
-  const styles = createStyles(colors);
+  const styles = createStyles(colors, insets);
+
 
   return (
     <LinearGradient
@@ -78,7 +82,14 @@ export default function NewListScreen() {
       end={{ x: 3, y: 0 }}
       style={styles.container}
     >
-    <BodyScrollView contentContainerStyle={styles.scrollViewContent}>
+      <KeyboardAvoidingView
+    style={{flex: 1}}
+    behavior={process.env.EXPO_OS !== 'ios' ? "padding" : "height"}
+    keyboardVerticalOffset={process.env.EXPO_OS !== 'ios' ? 20 : 0}>
+    <ScrollView 
+    style={(styles.scrollViewContent)}
+    keyboardShouldPersistTaps="handled"
+    >
       <StatusBar style="light" animated />
       <View style={styles.container}>
         <View style={styles.heroSection}>
@@ -143,21 +154,22 @@ export default function NewListScreen() {
           </View>
         </View>
       </View>
-    </BodyScrollView>
+    </ScrollView>
+    </KeyboardAvoidingView>
     </LinearGradient>
   );
 }
 
-function createStyles(colors: typeof Colors.light) {
+function createStyles(colors: typeof Colors.light, insets) {
   return StyleSheet.create({
   scrollViewContent: {
     marginTop: 45,
-    padding: 16,
-    marginBottom: 100,
+    paddingHorizontal: 16,
+    paddingBottom: insets.bottom
   },
   container: {
     flex: 1,
-    gap: 32,
+    gap: 36,
   },
   heroSection: {
     alignItems: "center",
